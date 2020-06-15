@@ -12,7 +12,7 @@ const (
 	queryInsertGrade           = `INSERT INTO grades(user_id, activity_id, grade, course_id) VALUES(?, ?, ?, ?);`
 	queryGetGrade              = `SELECT id, grade, course_id FROM grades WHERE user_id=? AND activity_id=?;`
 	queryGetGradeByID          = `SELECT user_id, activity_id, grade, course_id FROM grades WHERE id=?;`
-	queryGetAllUserGrade       = `SELECT id, activity_id, grade, course_id FROM grades WHERE user_id=?;`
+	queryGetAllUserGrade       = `SELECT id, activity_id, grade, course_id FROM grades WHERE user_id=? AND course_id=?;`
 	queryUpdateGrade           = `UPDATE grades SET grade=? WHERE id=?;`
 	queryDeleteGrade           = `DELETE FROM grades WHERE id=?;`
 	queryDeleteGradeByUserID   = `DELETE FROM grades WHERE user_id=?;`
@@ -43,7 +43,7 @@ func (grade *Grade) Save() rest_errors.RestErr {
 	return nil
 }
 
-func (grade *Grade) Get() rest_errors.RestErr {
+func (grade *Grade) GetByUserAndActivityID() rest_errors.RestErr {
 	stmt, err := grades_db.DbConn().Prepare(queryGetGrade)
 	if err != nil {
 		logger.Error("error when trying to prepare get user grade by user and section id statement", err)
@@ -60,7 +60,7 @@ func (grade *Grade) Get() rest_errors.RestErr {
 	return nil
 }
 
-func (grade *Grade) GetByID() rest_errors.RestErr {
+func (grade *Grade) GetByUserAndCourseID() rest_errors.RestErr {
 	stmt, err := grades_db.DbConn().Prepare(queryGetGradeByID)
 	if err != nil {
 		logger.Error("error when trying to prepare get user grade by id statement", err)
@@ -85,7 +85,7 @@ func (grade *Grade) GetAll() ([]Grade, rest_errors.RestErr) {
 	}
 	defer stmt.Close()
 
-	rows, err := stmt.Query(grade.UserID)
+	rows, err := stmt.Query(grade.UserID, grade.CourseID)
 	if err != nil {
 		logger.Error("error when trying to get all user grade", err)
 		return nil, rest_errors.NewInternalServerError("error when trying to get all user grade", errors.New("database error"))

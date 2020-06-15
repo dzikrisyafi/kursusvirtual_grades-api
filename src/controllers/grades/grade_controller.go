@@ -26,11 +26,28 @@ func Create(c *gin.Context) {
 		return
 	}
 
-	resp := rest_resp.NewStatusCreated("success saving user grade", result.Marshall(oauth.IsPublic(c.Request)))
+	resp := rest_resp.NewStatusCreated("success save user grade", result.Marshall(oauth.IsPublic(c.Request)))
 	c.JSON(resp.Status(), resp)
 }
 
 func Get(c *gin.Context) {
+	gradeID, idErr := controller_utils.GetIDInt(c.Param("grade_id"), "grade id")
+	if idErr != nil {
+		c.JSON(idErr.Status(), idErr)
+		return
+	}
+
+	grade, getErr := services.GradesService.GetGradeByID(gradeID)
+	if getErr != nil {
+		c.JSON(getErr.Status(), getErr)
+		return
+	}
+
+	resp := rest_resp.NewStatusOK("success get user grade", grade.Marshall(oauth.IsPublic(c.Request)))
+	c.JSON(resp.Status(), resp)
+}
+
+func GetByUserAndActivityID(c *gin.Context) {
 	userID, idErr := controller_utils.GetIDInt(c.Param("user_id"), "user id")
 	if idErr != nil {
 		c.JSON(idErr.Status(), idErr)
@@ -53,14 +70,20 @@ func Get(c *gin.Context) {
 	c.JSON(resp.Status(), resp)
 }
 
-func GetAll(c *gin.Context) {
+func GetAllByUserAndCourseID(c *gin.Context) {
 	userID, err := controller_utils.GetIDInt(c.Param("user_id"), "user id")
 	if err != nil {
 		c.JSON(err.Status(), err)
 		return
 	}
 
-	result, getErr := services.GradesService.GetAll(userID)
+	courseID, err := controller_utils.GetIDInt(c.Param("course_id"), "course id")
+	if err != nil {
+		c.JSON(err.Status(), err)
+		return
+	}
+
+	result, getErr := services.GradesService.GetAll(userID, courseID)
 	if getErr != nil {
 		c.JSON(getErr.Status(), getErr)
 		return

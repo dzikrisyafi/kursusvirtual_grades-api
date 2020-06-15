@@ -15,7 +15,7 @@ type gradesServiceInterface interface {
 	CreateGrade(grades.Grade) (*grades.Grade, rest_errors.RestErr)
 	GetGrade(int, int) (*grades.Grade, rest_errors.RestErr)
 	GetGradeByID(int) (*grades.Grade, rest_errors.RestErr)
-	GetAll(int) (grades.Grades, rest_errors.RestErr)
+	GetAll(int, int) (grades.Grades, rest_errors.RestErr)
 	UpdateGrade(grades.Grade) (*grades.Grade, rest_errors.RestErr)
 	DeleteGrade(int) rest_errors.RestErr
 	DeleteUserGradeByUserID(int) rest_errors.RestErr
@@ -36,7 +36,7 @@ func (s *gradesService) CreateGrade(grade grades.Grade) (*grades.Grade, rest_err
 
 func (s *gradesService) GetGrade(userID int, activityID int) (*grades.Grade, rest_errors.RestErr) {
 	result := &grades.Grade{UserID: userID, ActivityID: activityID}
-	if err := result.Get(); err != nil {
+	if err := result.GetByUserAndActivityID(); err != nil {
 		return nil, err
 	}
 
@@ -45,15 +45,15 @@ func (s *gradesService) GetGrade(userID int, activityID int) (*grades.Grade, res
 
 func (s *gradesService) GetGradeByID(gradeID int) (*grades.Grade, rest_errors.RestErr) {
 	result := &grades.Grade{ID: gradeID}
-	if err := result.GetByID(); err != nil {
+	if err := result.GetByUserAndCourseID(); err != nil {
 		return nil, err
 	}
 
 	return result, nil
 }
 
-func (s *gradesService) GetAll(userID int) (grades.Grades, rest_errors.RestErr) {
-	dao := &grades.Grade{UserID: userID}
+func (s *gradesService) GetAll(userID int, courseID int) (grades.Grades, rest_errors.RestErr) {
+	dao := &grades.Grade{UserID: userID, CourseID: courseID}
 	return dao.GetAll()
 }
 
