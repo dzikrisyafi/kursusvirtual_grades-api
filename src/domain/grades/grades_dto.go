@@ -3,10 +3,11 @@ package grades
 import "github.com/dzikrisyafi/kursusvirtual_utils-go/rest_errors"
 
 type Grade struct {
-	ID        int64 `json:"id"`
-	UserID    int64 `json:"user_id"`
-	SectionID int64 `json:"section_id"`
-	Grade     int64 `json:"grade"`
+	ID         int `json:"id"`
+	UserID     int `json:"user_id"`
+	ActivityID int `json:"activity_id"`
+	CourseID   int `json:"course_id"`
+	Grade      int `json:"grade"`
 }
 
 type Grades []Grade
@@ -16,7 +17,7 @@ func (grade Grade) Validate() rest_errors.RestErr {
 		return rest_errors.NewBadRequestError("invalid user id")
 	}
 
-	if grade.SectionID <= 0 {
+	if grade.ActivityID <= 0 {
 		return rest_errors.NewBadRequestError("invalid section id")
 	}
 

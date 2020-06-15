@@ -13,11 +13,13 @@ type gradesService struct{}
 
 type gradesServiceInterface interface {
 	CreateGrade(grades.Grade) (*grades.Grade, rest_errors.RestErr)
-	GetGrade(int64, int64) (*grades.Grade, rest_errors.RestErr)
-	GetGradeByID(int64) (*grades.Grade, rest_errors.RestErr)
-	GetAll(int64) (grades.Grades, rest_errors.RestErr)
+	GetGrade(int, int) (*grades.Grade, rest_errors.RestErr)
+	GetGradeByID(int) (*grades.Grade, rest_errors.RestErr)
+	GetAll(int) (grades.Grades, rest_errors.RestErr)
 	UpdateGrade(grades.Grade) (*grades.Grade, rest_errors.RestErr)
-	DeleteGrade(int64) rest_errors.RestErr
+	DeleteGrade(int) rest_errors.RestErr
+	DeleteUserGradeByUserID(int) rest_errors.RestErr
+	DeleteUserGradeByCourseID(int) rest_errors.RestErr
 }
 
 func (s *gradesService) CreateGrade(grade grades.Grade) (*grades.Grade, rest_errors.RestErr) {
@@ -32,8 +34,8 @@ func (s *gradesService) CreateGrade(grade grades.Grade) (*grades.Grade, rest_err
 	return &grade, nil
 }
 
-func (s *gradesService) GetGrade(userID int64, sectionID int64) (*grades.Grade, rest_errors.RestErr) {
-	result := &grades.Grade{UserID: userID, SectionID: sectionID}
+func (s *gradesService) GetGrade(userID int, activityID int) (*grades.Grade, rest_errors.RestErr) {
+	result := &grades.Grade{UserID: userID, ActivityID: activityID}
 	if err := result.Get(); err != nil {
 		return nil, err
 	}
@@ -41,7 +43,7 @@ func (s *gradesService) GetGrade(userID int64, sectionID int64) (*grades.Grade, 
 	return result, nil
 }
 
-func (s *gradesService) GetGradeByID(gradeID int64) (*grades.Grade, rest_errors.RestErr) {
+func (s *gradesService) GetGradeByID(gradeID int) (*grades.Grade, rest_errors.RestErr) {
 	result := &grades.Grade{ID: gradeID}
 	if err := result.GetByID(); err != nil {
 		return nil, err
@@ -50,7 +52,7 @@ func (s *gradesService) GetGradeByID(gradeID int64) (*grades.Grade, rest_errors.
 	return result, nil
 }
 
-func (s *gradesService) GetAll(userID int64) (grades.Grades, rest_errors.RestErr) {
+func (s *gradesService) GetAll(userID int) (grades.Grades, rest_errors.RestErr) {
 	dao := &grades.Grade{UserID: userID}
 	return dao.GetAll()
 }
@@ -68,7 +70,17 @@ func (s *gradesService) UpdateGrade(grade grades.Grade) (*grades.Grade, rest_err
 	return current, nil
 }
 
-func (s *gradesService) DeleteGrade(gradeID int64) rest_errors.RestErr {
+func (s *gradesService) DeleteGrade(gradeID int) rest_errors.RestErr {
 	dao := &grades.Grade{ID: gradeID}
 	return dao.Delete()
+}
+
+func (s *gradesService) DeleteUserGradeByUserID(userID int) rest_errors.RestErr {
+	dao := &grades.Grade{UserID: userID}
+	return dao.DeleteUserGradeByUserID()
+}
+
+func (s *gradesService) DeleteUserGradeByCourseID(courseID int) rest_errors.RestErr {
+	dao := &grades.Grade{CourseID: courseID}
+	return dao.DeleteUserGradeByCourseID()
 }

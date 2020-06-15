@@ -8,6 +8,7 @@ import (
 	"github.com/dzikrisyafi/kursusvirtual_oauth-go/oauth"
 	"github.com/dzikrisyafi/kursusvirtual_utils-go/controller_utils"
 	"github.com/dzikrisyafi/kursusvirtual_utils-go/rest_errors"
+	"github.com/dzikrisyafi/kursusvirtual_utils-go/rest_resp"
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,33 +26,35 @@ func Create(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, result.Marshall(oauth.IsPublic(c.Request)))
+	resp := rest_resp.NewStatusCreated("success saving user grade", result.Marshall(oauth.IsPublic(c.Request)))
+	c.JSON(resp.Status(), resp)
 }
 
 func Get(c *gin.Context) {
-	userID, idErr := controller_utils.GetID(c.Param("user_id"), "user id")
+	userID, idErr := controller_utils.GetIDInt(c.Param("user_id"), "user id")
 	if idErr != nil {
 		c.JSON(idErr.Status(), idErr)
 		return
 	}
 
-	sectionID, idErr := controller_utils.GetID(c.Param("section_id"), "section id")
+	activityID, idErr := controller_utils.GetIDInt(c.Param("activity_id"), "activity id")
 	if idErr != nil {
 		c.JSON(idErr.Status(), idErr)
 		return
 	}
 
-	grade, getErr := services.GradesService.GetGrade(userID, sectionID)
+	grade, getErr := services.GradesService.GetGrade(userID, activityID)
 	if getErr != nil {
 		c.JSON(getErr.Status(), getErr)
 		return
 	}
 
-	c.JSON(http.StatusOK, grade.Marshall(oauth.IsPublic(c.Request)))
+	resp := rest_resp.NewStatusOK("success get user grade", grade.Marshall(oauth.IsPublic(c.Request)))
+	c.JSON(resp.Status(), resp)
 }
 
 func GetAll(c *gin.Context) {
-	userID, err := controller_utils.GetID(c.Param("user_id"), "user id")
+	userID, err := controller_utils.GetIDInt(c.Param("user_id"), "user id")
 	if err != nil {
 		c.JSON(err.Status(), err)
 		return
@@ -63,11 +66,12 @@ func GetAll(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, result.Marshall(oauth.IsPublic(c.Request)))
+	resp := rest_resp.NewStatusOK("success get user grade", result.Marshall(oauth.IsPublic(c.Request)))
+	c.JSON(resp.Status(), resp)
 }
 
 func Update(c *gin.Context) {
-	gradeID, err := controller_utils.GetID(c.Param("grade_id"), "grade id")
+	gradeID, err := controller_utils.GetIDInt(c.Param("grade_id"), "grade id")
 	if err != nil {
 		c.JSON(err.Status(), err)
 		return
@@ -87,17 +91,48 @@ func Update(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, result.Marshall(oauth.IsPublic(c.Request)))
+	resp := rest_resp.NewStatusOK("success updating user grade", result.Marshall(oauth.IsPublic(c.Request)))
+	c.JSON(resp.Status(), resp)
 }
 
 func Delete(c *gin.Context) {
-	gradeID, err := controller_utils.GetID(c.Param("grade_id"), "grade id")
+	gradeID, err := controller_utils.GetIDInt(c.Param("grade_id"), "grade id")
 	if err != nil {
 		c.JSON(err.Status(), err)
 		return
 	}
 
 	if err := services.GradesService.DeleteGrade(gradeID); err != nil {
+		c.JSON(err.Status(), err)
+		return
+	}
+
+	c.JSON(http.StatusOK, map[string]interface{}{"message": "success deleted user grade", "status": http.StatusOK})
+}
+
+func DeleteAllByUserID(c *gin.Context) {
+	userID, err := controller_utils.GetIDInt(c.Param("user_id"), "user id")
+	if err != nil {
+		c.JSON(err.Status(), err)
+		return
+	}
+
+	if err := services.GradesService.DeleteUserGradeByUserID(userID); err != nil {
+		c.JSON(err.Status(), err)
+		return
+	}
+
+	c.JSON(http.StatusOK, map[string]interface{}{"message": "success deleted user grade", "status": http.StatusOK})
+}
+
+func DeleteAllByCourseID(c *gin.Context) {
+	courseID, err := controller_utils.GetIDInt(c.Param("course_id"), "user id")
+	if err != nil {
+		c.JSON(err.Status(), err)
+		return
+	}
+
+	if err := services.GradesService.DeleteUserGradeByCourseID(courseID); err != nil {
 		c.JSON(err.Status(), err)
 		return
 	}
