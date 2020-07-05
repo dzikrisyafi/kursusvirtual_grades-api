@@ -159,6 +159,4 @@ func DeleteAllByCourseID(c *gin.Context) {
 		c.JSON(err.Status(), err)
 		return
 	}
-
-	c.JSON(http.StatusOK, map[string]interface{}{"message": "success deleted user grade", "status": http.StatusOK})
 }

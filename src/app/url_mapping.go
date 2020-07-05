@@ -1,15 +1,26 @@
 package app
 
-import "github.com/dzikrisyafi/kursusvirtual_grades-api/src/controllers/grades"
+import (
+	"github.com/dzikrisyafi/kursusvirtual_grades-api/src/controllers/grades"
+	"github.com/dzikrisyafi/kursusvirtual_middleware/middleware"
+)
 
 func mapUrls() {
-	router.POST("/grades", grades.Create)
-	router.GET("/grades/:grade_id", grades.Get)
-	router.DELETE("/grades/:grade_id", grades.Delete)
-	router.PUT("/grades/:grade_id", grades.Update)
+	gradesGroup := router.Group("/grades")
+	gradesGroup.Use(middleware.Auth())
+	{
+		gradesGroup.POST("", grades.Create)
+		gradesGroup.GET("/:grade_id", grades.Get)
+		gradesGroup.DELETE("/:grade_id", grades.Delete)
+		gradesGroup.PUT("/:grade_id", grades.Update)
+	}
 
-	router.GET("internal/grade/user/:user_id/:activity_id", grades.GetByUserAndActivityID)
-	router.GET("internal/grades/users/:user_id/:course_id", grades.GetAllByUserAndCourseID)
-	router.DELETE("/internal/grades/users/:user_id", grades.DeleteAllByUserID)
-	router.DELETE("/internal/grades/courses/:course_id", grades.DeleteAllByCourseID)
+	internalGroup := router.Group("/internal")
+	internalGroup.Use(middleware.Auth())
+	{
+		internalGroup.GET("/grade/user/:user_id/:activity_id", grades.GetByUserAndActivityID)
+		internalGroup.GET("/grades/users/:user_id/:course_id", grades.GetAllByUserAndCourseID)
+		internalGroup.DELETE("/grades/users/:user_id", grades.DeleteAllByUserID)
+		internalGroup.DELETE("/grades/courses/:course_id", grades.DeleteAllByCourseID)
+	}
 }
